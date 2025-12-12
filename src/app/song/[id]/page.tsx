@@ -7,8 +7,10 @@
  * This page displays:
  * - Song metadata (title, artist, language)
  * - Full lyrics in a readable format
- * - "Copy for Projection" button (Smart Copy)
+ * - "Copy for Projection" button with format options
  * - "Download OpenLyrics" button (XML export)
+ * - "Share QR Code" button
+ * - "Print Lyrics" button
  * 
  * The layout is two-column on desktop:
  * - Left: Song info and lyrics
@@ -21,6 +23,8 @@ import { getSongById } from "@/lib/songs";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CopyButton } from "@/components/CopyButton";
 import { DownloadButton } from "@/components/DownloadButton";
+import { QRShareButton } from "@/components/QRShareButton";
+import { PrintButton } from "@/components/PrintButton";
 
 /** Page props with dynamic route parameter */
 interface PageProps {
@@ -39,13 +43,9 @@ interface PageProps {
  * @param params - Route parameters (contains 'id')
  */
 export default async function SongPage({ params }: PageProps) {
-    // Extract ID from route params
     const { id } = await params;
-
-    // Fetch song from database
     const song = await getSongById(id);
 
-    // Return 404 page if song doesn't exist
     if (!song) {
         notFound();
     }
@@ -54,7 +54,6 @@ export default async function SongPage({ params }: PageProps) {
         <div className="min-h-screen gradient-bg">
             {/* Header with Logo and Theme Toggle */}
             <header className="flex items-center justify-between p-4 md:p-6">
-                {/* Logo - links back to homepage */}
                 <Link
                     href="/"
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -77,18 +76,15 @@ export default async function SongPage({ params }: PageProps) {
                     <div>
                         {/* Song Metadata */}
                         <div className="mb-6">
-                            {/* Title */}
                             <h1
                                 className="text-3xl md:text-4xl font-bold mb-2"
                                 style={{ fontFamily: "var(--font-outfit)" }}
                             >
                                 {song.title}
                             </h1>
-                            {/* Artist */}
                             <p className="text-[var(--muted)] text-lg mb-3">
                                 {song.artist || "Unknown artist"}
                             </p>
-                            {/* Language Badge */}
                             <span className="inline-block px-3 py-1 text-sm rounded-full bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]">
                                 {song.language}
                             </span>
@@ -106,12 +102,17 @@ export default async function SongPage({ params }: PageProps) {
                     </div>
 
                     {/* Right Column: Action Buttons (Sticky on Desktop) */}
-                    <div className="md:sticky md:top-6 h-fit">
+                    <div className="md:sticky md:top-6 h-fit space-y-4">
+                        {/* Primary Actions */}
                         <div className="card p-4 space-y-3">
-                            {/* Primary Action: Copy formatted lyrics */}
                             <CopyButton song={song} />
-                            {/* Secondary Action: Download XML file */}
                             <DownloadButton song={song} />
+                        </div>
+
+                        {/* Secondary Actions */}
+                        <div className="card p-4 space-y-3">
+                            <QRShareButton songId={song.id} songTitle={song.title} />
+                            <PrintButton song={song} />
                         </div>
                     </div>
                 </div>

@@ -5,35 +5,114 @@
  * This file contains the "Smart Copy" functionality that formats lyrics
  * for import into church projection software like FreeShow and EasyWorship.
  * 
- * It also provides OpenLyrics XML export for maximum compatibility.
+ * Supports multiple slide formats:
+ * - 2 lines per slide
+ * - 4 lines per slide
+ * - Full verse per slide
+ * 
+ * Also provides OpenLyrics XML export for maximum compatibility.
  */
 
 import { Song } from "@/lib/songs";
 
+/** Available slide format options */
+export type SlideFormat = "2-lines" | "4-lines" | "full-verse";
+
 /**
- * Formats a song's lyrics for projection software (FreeShow, EasyWorship).
+ * Splits lyrics into slides based on the selected format.
  * 
- * The output format includes:
- * - Title: [Song Title]
- * - Author: [Artist Name]
- * - [Blank line]
- * - [Full lyrics]
+ * @param lyrics - The raw lyrics text
+ * @param format - The slide format to use
+ * @returns Array of slide strings, each representing one slide
+ */
+export function splitIntoSlides(lyrics: string, format: SlideFormat): string[] {
+  // Split by paragraph (double newline) for verse detection
+  const paragraphs = lyrics.split(/\n\n+/).filter(p => p.trim());
+
+  if (format === "full-verse") {
+    // Each paragraph (verse/chorus) becomes one slide
+    return paragraphs;
+  }
+
+  const slides: string[] = [];
+  const linesPerSlide = format === "2-lines" ? 2 : 4;
+
+  for (const paragraph of paragraphs) {
+    const lines = paragraph.split("\n").filter(l => l.trim());
+
+    // Group lines according to format
+    for (let i = 0; i < lines.length; i += linesPerSlide) {
+      const slideLines = lines.slice(i, i + linesPerSlide);
+      slides.push(slideLines.join("\n"));
+    }
+  }
+
+  return slides;
+}
+
+/**
+ * Formats a song's lyrics for projection software.
  * 
- * This format is recognized by most church projection software for import.
+ * Output format:
+ * - Header with title and author
+ * - Each slide separated by double blank lines
+ * - Compatible with FreeShow, EasyWorship, and similar software
  * 
  * @param song - The song object to format
+ * @param format - The slide format to use (default: "full-verse")
  * @returns Formatted string ready to paste into projection software
  * 
  * @example
- * const formatted = formatForProjection(song);
+ * const formatted = formatForProjection(song, "2-lines");
  * navigator.clipboard.writeText(formatted);
  */
-export function formatForProjection(song: Song): string {
-  // Header format required by EasyWorship/FreeShow imports
-  const header = `Title: ${song.title}\nAuthor: ${song.artist || "Unknown"}\n\n`;
+export function formatForProjection(song: Song, format: SlideFormat = "full-verse"): string {
+  // Split lyrics into slides
+  const slides = splitIntoSlides(song.lyrics, format);
 
-  // Combine header with full lyrics
-  return header + song.lyrics;
+  // Join slides with double blank lines (slide separator for FreeShow)
+  return slides.join("\n\n\n");
+}
+
+/**
+ * Parses lyrics to identify verse/chorus sections.
+ * Looks for markers like [Verse 1], [Chorus], [Bridge], etc.
+ * 
+ * @param lyrics - The raw lyrics text
+ * @returns Array of sections with type and content
+ */
+export function parseLyricsSections(lyrics: string): Array<{ type: string; content: string }> {
+  const sections: Array<{ type: string; content: string }> = [];
+
+  // Regex to match section markers like [Verse 1], [Chorus], etc.
+  const sectionRegex = /\[(Verse\s*\d*|Chorus|Bridge|Pre-Chorus|Intro|Outro|Tag)\]/gi;
+
+  // Split by section markers while keeping the markers
+  const parts = lyrics.split(sectionRegex);
+
+  let currentType = "Verse";
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i].trim();
+    if (!part) continue;
+
+    // Check if this part is a section marker
+    if (sectionRegex.test(`[${part}]`)) {
+      currentType = part;
+    } else {
+      sections.push({
+        type: currentType,
+        content: part
+      });
+    }
+  }
+
+  // If no sections were found, treat entire lyrics as one section
+  if (sections.length === 0 && lyrics.trim()) {
+    sections.push({ type: "Verse", content: lyrics.trim() });
+  }
+
+  return sections;
 }
 
 /**
@@ -42,21 +121,10 @@ export function formatForProjection(song: Song): string {
  * OpenLyrics is an open standard for sharing worship lyrics.
  * See: http://openlyrics.org/
  * 
- * This XML format is compatible with:
- * - OpenLP
- * - SongBeamer
- * - VideoPsalm
- * - And other OpenLyrics-compatible software
- * 
  * @param song - The song object to convert to XML
  * @returns XML string in OpenLyrics format
- * 
- * @example
- * const xml = generateOpenLyricsXML(song);
- * // Save as .xml file for import into projection software
  */
 export function generateOpenLyricsXML(song: Song): string {
-  // Escape special XML characters to prevent parsing errors
   const escapedTitle = escapeXml(song.title);
   const escapedArtist = escapeXml(song.artist || "Unknown");
   const escapedLyrics = escapeXml(song.lyrics);
@@ -87,7 +155,7 @@ export function generateOpenLyricsXML(song: Song): string {
  */
 function escapeXml(text: string): string {
   return text
-    .replace(/&/g, "&amp;")   // Must be first to avoid double-escaping
+    .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
