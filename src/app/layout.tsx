@@ -40,12 +40,43 @@ const inter = Inter({
 
 /**
  * Page metadata for SEO.
- * Used by Next.js to generate <head> tags.
+ * Includes Open Graph and Twitter cards for social sharing.
  */
 export const metadata: Metadata = {
-  title: "1co18 - Ghanaian Worship Lyrics",
-  description: "Find and copy Ghanaian worship lyrics for projection software like FreeShow and EasyWorship.",
-  keywords: ["worship", "lyrics", "Ghana", "Twi", "church", "FreeShow", "EasyWorship"],
+  title: {
+    default: "1co18 - Ghanaian Worship Lyrics",
+    template: "%s | 1co18",
+  },
+  description: "Find and copy Ghanaian worship lyrics in Twi, Ga, and other local languages. Formatted for projection software like FreeShow and EasyWorship.",
+  keywords: ["worship lyrics", "Ghana", "Twi", "Ghanaian gospel", "church projection", "FreeShow", "EasyWorship", "praise and worship", "African hymns"],
+  authors: [{ name: "1co18 Community" }],
+  creator: "1co18",
+  metadataBase: new URL("https://1co18.vercel.app"),
+  openGraph: {
+    type: "website",
+    locale: "en_GH",
+    url: "https://1co18.vercel.app",
+    title: "1co18 - Ghanaian Worship Lyrics",
+    description: "Find and copy Ghanaian worship lyrics for church projection. Twi, Ga, Ewe, and more.",
+    siteName: "1co18",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "1co18 - Ghanaian Worship Lyrics",
+    description: "Find and copy Ghanaian worship lyrics for church projection.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  verification: {
+    // Add your Google Search Console verification code here
+    // google: "your-verification-code",
+  },
 };
 
 /**
