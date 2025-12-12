@@ -1,19 +1,56 @@
+/**
+ * @file CopyButton.tsx
+ * @description "Copy for Projection" button component.
+ * 
+ * This is the core "Smart Copy" feature of 1co18.
+ * It formats lyrics in a way that FreeShow, EasyWorship, and other
+ * church projection software can recognize and import.
+ * 
+ * The button copies formatted lyrics to the clipboard and shows
+ * a "Copied!" confirmation for 2 seconds.
+ */
+
 "use client";
 
 import { useState } from "react";
 import { Song } from "@/lib/songs";
 import { formatForProjection } from "@/utils/formatLyrics";
 
+/** Props for the CopyButton component */
 interface CopyButtonProps {
+    /** The song object to format and copy */
     song: Song;
 }
 
+/**
+ * Copy for Projection button component.
+ * 
+ * When clicked:
+ * 1. Formats the song using formatForProjection()
+ * 2. Copies the formatted text to clipboard
+ * 3. Shows "Copied!" feedback for 2 seconds
+ * 
+ * @param song - The song to copy
+ * 
+ * @example
+ * <CopyButton song={currentSong} />
+ */
 export function CopyButton({ song }: CopyButtonProps) {
+    // Track copy state for showing feedback
     const [copied, setCopied] = useState(false);
 
+    /**
+     * Handles the copy action.
+     * Formats lyrics and writes to clipboard.
+     */
     const handleCopy = async () => {
+        // Format lyrics for projection software
         const formatted = formatForProjection(song);
+
+        // Copy to clipboard
         await navigator.clipboard.writeText(formatted);
+
+        // Show feedback and reset after 2 seconds
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -25,6 +62,7 @@ export function CopyButton({ song }: CopyButtonProps) {
         >
             {copied ? (
                 <>
+                    {/* Checkmark icon - shown after copying */}
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="20"
@@ -42,6 +80,7 @@ export function CopyButton({ song }: CopyButtonProps) {
                 </>
             ) : (
                 <>
+                    {/* Copy icon - default state */}
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="20"

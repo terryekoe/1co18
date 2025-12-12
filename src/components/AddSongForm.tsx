@@ -1,21 +1,63 @@
+/**
+ * @file AddSongForm.tsx
+ * @description Form component for adding new songs to the database.
+ * 
+ * Features:
+ * - Form fields: Title, Artist, Language, Lyrics
+ * - Twi character buttons (ɛ, ɔ, ŋ) for easy input
+ * - Form validation (title and lyrics required)
+ * - Loading state during submission
+ * - Error handling with user-friendly messages
+ * - Success confirmation with "Add Another" option
+ * 
+ * This allows community members to contribute worship lyrics.
+ */
+
 "use client";
 
 import { useState } from "react";
 import { addSong } from "@/lib/songs";
 
+/** Available language options for songs */
 const LANGUAGES = ["Twi", "English", "Ga", "Ewe", "Fante", "Dagbani"];
 
+/** Twi special characters that need dedicated input buttons */
+const TWI_CHARACTERS = ["ɛ", "ɔ", "ŋ", "Ɛ", "Ɔ", "Ŋ"];
+
+/**
+ * Add Song form component.
+ * 
+ * Renders a form with:
+ * - Song title input (required)
+ * - Artist/group input (optional)
+ * - Language dropdown
+ * - Lyrics textarea with Twi character buttons
+ * - Submit button with loading state
+ * 
+ * After successful submission, shows a thank you message
+ * with option to add another song.
+ * 
+ * @example
+ * <AddSongForm />
+ */
 export function AddSongForm() {
+    // Form field values
     const [formData, setFormData] = useState({
         title: "",
         artist: "",
         language: "Twi",
         lyrics: "",
     });
+
+    // Form state flags
     const [submitted, setSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    /**
+     * Handle input field changes.
+     * Updates the corresponding field in formData state.
+     */
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) => {
@@ -23,11 +65,16 @@ export function AddSongForm() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    /**
+     * Handle form submission.
+     * Sends the song data to Supabase and handles success/error states.
+     */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
 
+        // Submit to database
         const result = await addSong(formData);
 
         if (result.success) {
@@ -39,6 +86,33 @@ export function AddSongForm() {
         setIsSubmitting(false);
     };
 
+    /**
+     * Insert a Twi character at the current cursor position in the lyrics textarea.
+     * Maintains cursor position after insertion.
+     */
+    const insertCharacter = (char: string) => {
+        const textarea = document.getElementById("lyrics") as HTMLTextAreaElement;
+        if (textarea) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            // Insert character at cursor position
+            const newValue =
+                formData.lyrics.substring(0, start) +
+                char +
+                formData.lyrics.substring(end);
+
+            setFormData((prev) => ({ ...prev, lyrics: newValue }));
+
+            // Restore cursor position after the inserted character
+            setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(start + 1, start + 1);
+            }, 0);
+        }
+    };
+
+    // Show success message after submission
     if (submitted) {
         return (
             <div className="text-center py-8">
@@ -64,13 +138,14 @@ export function AddSongForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Error Message */}
             {error && (
                 <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
                     {error}
                 </div>
             )}
 
-            {/* Song Title */}
+            {/* Song Title Field */}
             <div>
                 <label htmlFor="title" className="block text-sm font-medium mb-2">
                     Song Title <span className="text-[var(--accent)]">*</span>
@@ -87,7 +162,7 @@ export function AddSongForm() {
                 />
             </div>
 
-            {/* Artist */}
+            {/* Artist Field */}
             <div>
                 <label htmlFor="artist" className="block text-sm font-medium mb-2">
                     Artist / Group
@@ -103,7 +178,7 @@ export function AddSongForm() {
                 />
             </div>
 
-            {/* Language */}
+            {/* Language Dropdown */}
             <div>
                 <label htmlFor="language" className="block text-sm font-medium mb-2">
                     Language
@@ -123,35 +198,20 @@ export function AddSongForm() {
                 </select>
             </div>
 
-            {/* Lyrics */}
+            {/* Lyrics Field with Twi Character Buttons */}
             <div>
                 <label htmlFor="lyrics" className="block text-sm font-medium mb-2">
                     Lyrics <span className="text-[var(--accent)]">*</span>
                 </label>
 
-                {/* Twi Character Buttons */}
+                {/* Twi Character Insertion Buttons */}
                 <div className="flex flex-wrap gap-2 mb-2">
                     <span className="text-xs text-[var(--muted)] mr-1 self-center">Insert:</span>
-                    {["ɛ", "ɔ", "ŋ", "Ɛ", "Ɔ", "Ŋ"].map((char) => (
+                    {TWI_CHARACTERS.map((char) => (
                         <button
                             key={char}
                             type="button"
-                            onClick={() => {
-                                const textarea = document.getElementById("lyrics") as HTMLTextAreaElement;
-                                if (textarea) {
-                                    const start = textarea.selectionStart;
-                                    const end = textarea.selectionEnd;
-                                    const newValue =
-                                        formData.lyrics.substring(0, start) +
-                                        char +
-                                        formData.lyrics.substring(end);
-                                    setFormData((prev) => ({ ...prev, lyrics: newValue }));
-                                    setTimeout(() => {
-                                        textarea.focus();
-                                        textarea.setSelectionRange(start + 1, start + 1);
-                                    }, 0);
-                                }
-                            }}
+                            onClick={() => insertCharacter(char)}
                             className="px-3 py-1 text-sm font-medium rounded border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors bg-[var(--surface)]"
                         >
                             {char}
@@ -159,6 +219,7 @@ export function AddSongForm() {
                     ))}
                 </div>
 
+                {/* Lyrics Textarea */}
                 <textarea
                     id="lyrics"
                     name="lyrics"
@@ -177,7 +238,7 @@ Chorus:
                 />
             </div>
 
-            {/* Submit */}
+            {/* Submit Button */}
             <button
                 type="submit"
                 disabled={isSubmitting}
@@ -185,6 +246,7 @@ Chorus:
             >
                 {isSubmitting ? (
                     <>
+                        {/* Loading Spinner */}
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         Submitting...
                     </>
