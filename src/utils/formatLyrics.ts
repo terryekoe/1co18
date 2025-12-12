@@ -26,25 +26,21 @@ export type SlideFormat = "2-lines" | "4-lines" | "full-verse";
  * @returns Array of slide strings, each representing one slide
  */
 export function splitIntoSlides(lyrics: string, format: SlideFormat): string[] {
-  // Split by paragraph (double newline) for verse detection
-  const paragraphs = lyrics.split(/\n\n+/).filter(p => p.trim());
+  // Get all non-empty lines (ignoring blank lines for counting)
+  const allLines = lyrics.split("\n").filter(l => l.trim());
 
   if (format === "full-verse") {
-    // Each paragraph (verse/chorus) becomes one slide
-    return paragraphs;
+    // Split by paragraphs for full-verse mode
+    return lyrics.split(/\n\n+/).filter(p => p.trim());
   }
 
   const slides: string[] = [];
   const linesPerSlide = format === "2-lines" ? 2 : 4;
 
-  for (const paragraph of paragraphs) {
-    const lines = paragraph.split("\n").filter(l => l.trim());
-
-    // Group lines according to format
-    for (let i = 0; i < lines.length; i += linesPerSlide) {
-      const slideLines = lines.slice(i, i + linesPerSlide);
-      slides.push(slideLines.join("\n"));
-    }
+  // Group all lines by the specified count
+  for (let i = 0; i < allLines.length; i += linesPerSlide) {
+    const slideLines = allLines.slice(i, i + linesPerSlide);
+    slides.push(slideLines.join("\n"));
   }
 
   return slides;

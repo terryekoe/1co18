@@ -53,7 +53,10 @@ export function CopyButton({ song }: CopyButtonProps) {
      * Formats lyrics with selected format and writes to clipboard.
      */
     const handleCopy = async () => {
+        console.log("Format selected:", format);
         const formatted = formatForProjection(song, format);
+        console.log("Formatted output:", formatted);
+        console.log("Number of slides:", formatted.split("\n\n\n").length);
         await navigator.clipboard.writeText(formatted);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -68,8 +71,8 @@ export function CopyButton({ song }: CopyButtonProps) {
                         key={option.value}
                         onClick={() => setFormat(option.value)}
                         className={`flex-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${format === option.value
-                                ? "bg-[var(--accent)] text-white"
-                                : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                            ? "bg-[var(--accent)] text-white"
+                            : "text-[var(--muted)] hover:text-[var(--foreground)]"
                             }`}
                     >
                         {option.label}
