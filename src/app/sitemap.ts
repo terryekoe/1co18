@@ -14,7 +14,7 @@ import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://1co18.vercel.app';
+    const baseUrl = 'https://1co18.com';
 
     // Fetch all song IDs from database
     const { data: songs } = await supabase

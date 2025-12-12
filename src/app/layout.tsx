@@ -51,11 +51,11 @@ export const metadata: Metadata = {
   keywords: ["worship lyrics", "Ghana", "Twi", "Ghanaian gospel", "church projection", "FreeShow", "EasyWorship", "praise and worship", "African hymns"],
   authors: [{ name: "1co18 Community" }],
   creator: "1co18",
-  metadataBase: new URL("https://1co18.vercel.app"),
+  metadataBase: new URL("https://1co18.com"),
   openGraph: {
     type: "website",
     locale: "en_GH",
-    url: "https://1co18.vercel.app",
+    url: "https://1co18.com",
     title: "1co18 - Ghanaian Worship Lyrics",
     description: "Find and copy Ghanaian worship lyrics for church projection. Twi, Ga, Ewe, and more.",
     siteName: "1co18",
