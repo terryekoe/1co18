@@ -53,10 +53,7 @@ export function CopyButton({ song }: CopyButtonProps) {
      * Formats lyrics with selected format and writes to clipboard.
      */
     const handleCopy = async () => {
-        console.log("Format selected:", format);
         const formatted = formatForProjection(song, format);
-        console.log("Formatted output:", formatted);
-        console.log("Number of slides:", formatted.split("\n\n\n").length);
         await navigator.clipboard.writeText(formatted);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
