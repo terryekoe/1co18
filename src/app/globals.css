@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+/* 1co18 Design Tokens */
+:root {
+  /* Light Mode */
+  --background: #f7f7f7;
+  --surface: #ffffff;
+  --foreground: #1a1a1a;
+  --muted: #6b6b6b;
+  --accent: #fa057f;
+  --accent-hover: #e0046f;
+  --border: #e5e5e5;
+}
+
+.dark {
+  /* Dark Mode */
+  --background: #121212;
+  --surface: #1e1e1e;
+  --foreground: #f7f7f7;
+  --muted: #a0a0a0;
+  --accent: #fa057f;
+  --accent-hover: #ff2a94;
+  --border: #2a2a2a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-border: var(--border);
+  --font-outfit: var(--font-outfit);
+  --font-inter: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Subtle gradient background */
+.gradient-bg {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
+}
+
+/* Logo glow effect */
+.logo-glow {
+  text-shadow: 0 0 40px rgba(250, 5, 127, 0.15);
+}
+
+.dark .logo-glow {
+  text-shadow: 0 0 60px rgba(250, 5, 127, 0.25);
+}
+
+/* Search bar styles */
+.search-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.search-bar:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.search-bar:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(250, 5, 127, 0.1);
+}
+
+.dark .search-bar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dark .search-bar:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Button styles */
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Card styles */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* Lyrics display */
+.lyrics-text {
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
