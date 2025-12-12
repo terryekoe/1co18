@@ -52,6 +52,10 @@ export const metadata: Metadata = {
   authors: [{ name: "1co18 Community" }],
   creator: "1co18",
   metadataBase: new URL("https://1co18.com"),
+  icons: {
+    icon: "/favicon.png",
+    apple: "/icon.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_GH",
