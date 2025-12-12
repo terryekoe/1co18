@@ -85,7 +85,7 @@ export default async function SongPage({ params }: PageProps) {
                             <p className="text-[var(--muted)] text-lg mb-3">
                                 {song.artist || "Unknown artist"}
                             </p>
-                            <span className="inline-block px-3 py-1 text-sm rounded-full bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]">
+                            <span className="inline-block px-3 py-1 text-sm font-medium rounded-full" style={{ backgroundColor: 'rgba(250, 5, 127, 0.15)', color: 'var(--accent)' }}>
                                 {song.language}
                             </span>
                         </div>

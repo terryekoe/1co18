@@ -90,7 +90,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                                 {/* Artist */}
                                 <p className="text-[var(--muted)]">{song.artist || "Unknown artist"}</p>
                                 {/* Language Badge */}
-                                <span className="inline-block mt-2 px-2 py-0.5 text-xs rounded-full bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]">
+                                <span className="inline-block mt-2 px-2 py-0.5 text-xs rounded-full font-medium" style={{ backgroundColor: 'rgba(250, 5, 127, 0.15)', color: 'var(--accent)' }}>
                                     {song.language}
                                 </span>
                             </Link>

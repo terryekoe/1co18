@@ -245,8 +245,8 @@ export function SearchBar() {
                                             href={`/song/${song.id}`}
                                             onClick={() => setIsOpen(false)}
                                             className={`flex items-center justify-between px-5 py-3 transition-colors ${index === selectedIndex
-                                                    ? "bg-[var(--accent)] bg-opacity-10"
-                                                    : "hover:bg-[var(--border)] hover:bg-opacity-50"
+                                                ? "bg-[var(--accent)] bg-opacity-10"
+                                                : "hover:bg-[var(--border)] hover:bg-opacity-50"
                                                 }`}
                                         >
                                             <div>
@@ -263,7 +263,7 @@ export function SearchBar() {
                                                 </div>
                                             </div>
                                             {/* Language Badge */}
-                                            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]">
+                                            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: 'rgba(250, 5, 127, 0.15)', color: 'var(--accent)' }}>
                                                 {song.language}
                                             </span>
                                         </Link>
