@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { searchSongs, Song } from "@/lib/songs";
+import { searchSongsSuggestions, Song, normalizeForSearch } from "@/lib/songs";
 
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -24,20 +24,23 @@ function useDebounce<T>(value: T, delay: number): T {
 function HighlightMatch({ text, query }: { text: string; query: string }) {
     if (!query.trim()) return <>{text}</>;
 
-    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
-    const parts = text.split(regex);
+    // Normalize both for matching, but display original text
+    const normalizedText = normalizeForSearch(text);
+    const normalizedQuery = normalizeForSearch(query);
+
+    const index = normalizedText.indexOf(normalizedQuery);
+    if (index === -1) return <>{text}</>;
+
+    // Find corresponding position in original text
+    const before = text.substring(0, index);
+    const match = text.substring(index, index + query.length);
+    const after = text.substring(index + query.length);
 
     return (
         <>
-            {parts.map((part, i) =>
-                regex.test(part) ? (
-                    <span key={i} className="text-[var(--accent)] font-medium">
-                        {part}
-                    </span>
-                ) : (
-                    <span key={i}>{part}</span>
-                )
-            )}
+            {before}
+            <span className="text-[var(--accent)] font-medium">{match}</span>
+            {after}
         </>
     );
 }
@@ -46,6 +49,7 @@ export function SearchBar() {
     const [query, setQuery] = useState("");
     const [suggestions, setSuggestions] = useState<Song[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const router = useRouter();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -55,15 +59,20 @@ export function SearchBar() {
 
     // Search when debounced query changes
     useEffect(() => {
-        if (debouncedQuery.trim()) {
-            const results = searchSongs(debouncedQuery).slice(0, 5);
-            setSuggestions(results);
-            setIsOpen(true);
-            setSelectedIndex(-1);
-        } else {
-            setSuggestions([]);
-            setIsOpen(false);
+        async function fetchSuggestions() {
+            if (debouncedQuery.trim()) {
+                setIsLoading(true);
+                const results = await searchSongsSuggestions(debouncedQuery);
+                setSuggestions(results);
+                setIsOpen(true);
+                setSelectedIndex(-1);
+                setIsLoading(false);
+            } else {
+                setSuggestions([]);
+                setIsOpen(false);
+            }
         }
+        fetchSuggestions();
     }, [debouncedQuery]);
 
     // Close dropdown when clicking outside
@@ -146,69 +155,82 @@ export function SearchBar() {
                         style={{ fontFamily: "var(--font-inter)" }}
                         autoComplete="off"
                     />
+
+                    {/* Loading indicator */}
+                    {isLoading && (
+                        <div className="w-5 h-5 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+                    )}
                 </div>
             </form>
 
             {/* Suggestions Dropdown */}
-            {isOpen && suggestions.length > 0 && (
+            {isOpen && (suggestions.length > 0 || isLoading) && (
                 <div className="absolute top-full left-0 right-0 mt-2 card overflow-hidden shadow-lg z-50">
-                    <ul className="py-2">
-                        {suggestions.map((song, index) => (
-                            <li key={song.id}>
-                                <Link
-                                    href={`/song/${song.id}`}
-                                    onClick={() => setIsOpen(false)}
-                                    className={`flex items-center justify-between px-5 py-3 transition-colors ${index === selectedIndex
-                                            ? "bg-[var(--accent)] bg-opacity-10"
-                                            : "hover:bg-[var(--border)] hover:bg-opacity-50"
-                                        }`}
-                                >
-                                    <div>
-                                        <div
-                                            className="font-medium"
-                                            style={{ fontFamily: "var(--font-outfit)" }}
+                    {suggestions.length > 0 ? (
+                        <>
+                            <ul className="py-2">
+                                {suggestions.map((song, index) => (
+                                    <li key={song.id}>
+                                        <Link
+                                            href={`/song/${song.id}`}
+                                            onClick={() => setIsOpen(false)}
+                                            className={`flex items-center justify-between px-5 py-3 transition-colors ${index === selectedIndex
+                                                    ? "bg-[var(--accent)] bg-opacity-10"
+                                                    : "hover:bg-[var(--border)] hover:bg-opacity-50"
+                                                }`}
                                         >
-                                            <HighlightMatch text={song.title} query={query} />
-                                        </div>
-                                        <div className="text-sm text-[var(--muted)]">
-                                            {song.artist}
-                                        </div>
-                                    </div>
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]">
-                                        {song.language}
-                                    </span>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
+                                            <div>
+                                                <div
+                                                    className="font-medium"
+                                                    style={{ fontFamily: "var(--font-outfit)" }}
+                                                >
+                                                    <HighlightMatch text={song.title} query={query} />
+                                                </div>
+                                                <div className="text-sm text-[var(--muted)]">
+                                                    {song.artist || "Unknown artist"}
+                                                </div>
+                                            </div>
+                                            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]">
+                                                {song.language}
+                                            </span>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
 
-                    {/* Search all results link */}
-                    <div className="border-t border-[var(--border)] px-5 py-3">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-                                setIsOpen(false);
-                            }}
-                            className="text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-2"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <circle cx="11" cy="11" r="8" />
-                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                            </svg>
-                            Search for &quot;{query}&quot;
-                        </button>
-                    </div>
+                            {/* Search all results link */}
+                            <div className="border-t border-[var(--border)] px-5 py-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                                        setIsOpen(false);
+                                    }}
+                                    className="text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-2"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="11" cy="11" r="8" />
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                    </svg>
+                                    Search for &quot;{query}&quot;
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="px-5 py-4 text-center text-[var(--muted)]">
+                            No songs found
+                        </div>
+                    )}
                 </div>
             )}
         </div>

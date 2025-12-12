@@ -5,11 +5,11 @@ import { Song } from "@/lib/songs";
  * Output structure follows the expected import format
  */
 export function formatForProjection(song: Song): string {
-    // Header required by EasyWorship/FreeShow imports
-    const header = `Title: ${song.title}\nAuthor: ${song.artist}\n\n`;
+  // Header required by EasyWorship/FreeShow imports
+  const header = `Title: ${song.title}\nAuthor: ${song.artist || "Unknown"}\n\n`;
 
-    // Ensure proper section formatting with blank lines
-    return header + song.lyrics;
+  // Ensure proper section formatting with blank lines
+  return header + song.lyrics;
 }
 
 /**
@@ -17,11 +17,11 @@ export function formatForProjection(song: Song): string {
  * See: http://openlyrics.org/
  */
 export function generateOpenLyricsXML(song: Song): string {
-    const escapedTitle = escapeXml(song.title);
-    const escapedArtist = escapeXml(song.artist);
-    const escapedLyrics = escapeXml(song.lyrics);
+  const escapedTitle = escapeXml(song.title);
+  const escapedArtist = escapeXml(song.artist || "Unknown");
+  const escapedLyrics = escapeXml(song.lyrics);
 
-    return `<?xml version="1.0" encoding="UTF-8"?>
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <song xmlns="http://openlyrics.info/namespace/2009/song" version="0.8">
   <properties>
     <titles>
@@ -40,10 +40,10 @@ export function generateOpenLyricsXML(song: Song): string {
 }
 
 function escapeXml(text: string): string {
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&apos;");
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }

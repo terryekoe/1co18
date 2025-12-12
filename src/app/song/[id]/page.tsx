@@ -11,7 +11,7 @@ interface PageProps {
 
 export default async function SongPage({ params }: PageProps) {
     const { id } = await params;
-    const song = getSongById(id);
+    const song = await getSongById(id);
 
     if (!song) {
         notFound();
@@ -48,7 +48,7 @@ export default async function SongPage({ params }: PageProps) {
                             >
                                 {song.title}
                             </h1>
-                            <p className="text-[var(--muted)] text-lg mb-3">{song.artist}</p>
+                            <p className="text-[var(--muted)] text-lg mb-3">{song.artist || "Unknown artist"}</p>
                             <span className="inline-block px-3 py-1 text-sm rounded-full bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]">
                                 {song.language}
                             </span>

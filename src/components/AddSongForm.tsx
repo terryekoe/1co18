@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { addSong } from "@/lib/songs";
 
 const LANGUAGES = ["Twi", "English", "Ga", "Ewe", "Fante", "Dagbani"];
 
@@ -12,6 +13,8 @@ export function AddSongForm() {
         lyrics: "",
     });
     const [submitted, setSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -20,11 +23,20 @@ export function AddSongForm() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Submit to Supabase
-        console.log("Submitting song:", formData);
-        setSubmitted(true);
+        setIsSubmitting(true);
+        setError(null);
+
+        const result = await addSong(formData);
+
+        if (result.success) {
+            setSubmitted(true);
+        } else {
+            setError(result.error || "Failed to submit song. Please try again.");
+        }
+
+        setIsSubmitting(false);
     };
 
     if (submitted) {
@@ -52,6 +64,12 @@ export function AddSongForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+                <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+                    {error}
+                </div>
+            )}
+
             {/* Song Title */}
             <div>
                 <label htmlFor="title" className="block text-sm font-medium mb-2">
@@ -128,7 +146,6 @@ export function AddSongForm() {
                                         char +
                                         formData.lyrics.substring(end);
                                     setFormData((prev) => ({ ...prev, lyrics: newValue }));
-                                    // Restore cursor position after state update
                                     setTimeout(() => {
                                         textarea.focus();
                                         textarea.setSelectionRange(start + 1, start + 1);
@@ -163,9 +180,17 @@ Chorus:
             {/* Submit */}
             <button
                 type="submit"
-                className="w-full btn-primary py-3 rounded-lg font-medium text-lg"
+                disabled={isSubmitting}
+                className="w-full btn-primary py-3 rounded-lg font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-                Submit Song
+                {isSubmitting ? (
+                    <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Submitting...
+                    </>
+                ) : (
+                    "Submit Song"
+                )}
             </button>
         </form>
     );

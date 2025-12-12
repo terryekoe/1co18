@@ -9,7 +9,7 @@ interface PageProps {
 
 export default async function SearchPage({ searchParams }: PageProps) {
     const { q: query } = await searchParams;
-    const results = query ? searchSongs(query) : [];
+    const results = query ? await searchSongs(query) : [];
 
     return (
         <div className="min-h-screen gradient-bg">
@@ -56,7 +56,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                                 >
                                     {song.title}
                                 </h2>
-                                <p className="text-[var(--muted)]">{song.artist}</p>
+                                <p className="text-[var(--muted)]">{song.artist || "Unknown artist"}</p>
                                 <span className="inline-block mt-2 px-2 py-0.5 text-xs rounded-full bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]">
                                     {song.language}
                                 </span>
