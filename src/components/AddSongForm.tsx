@@ -110,6 +110,38 @@ export function AddSongForm() {
                 <label htmlFor="lyrics" className="block text-sm font-medium mb-2">
                     Lyrics <span className="text-[var(--accent)]">*</span>
                 </label>
+
+                {/* Twi Character Buttons */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                    <span className="text-xs text-[var(--muted)] mr-1 self-center">Insert:</span>
+                    {["ɛ", "ɔ", "ŋ", "Ɛ", "Ɔ", "Ŋ"].map((char) => (
+                        <button
+                            key={char}
+                            type="button"
+                            onClick={() => {
+                                const textarea = document.getElementById("lyrics") as HTMLTextAreaElement;
+                                if (textarea) {
+                                    const start = textarea.selectionStart;
+                                    const end = textarea.selectionEnd;
+                                    const newValue =
+                                        formData.lyrics.substring(0, start) +
+                                        char +
+                                        formData.lyrics.substring(end);
+                                    setFormData((prev) => ({ ...prev, lyrics: newValue }));
+                                    // Restore cursor position after state update
+                                    setTimeout(() => {
+                                        textarea.focus();
+                                        textarea.setSelectionRange(start + 1, start + 1);
+                                    }, 0);
+                                }
+                            }}
+                            className="px-3 py-1 text-sm font-medium rounded border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors bg-[var(--surface)]"
+                        >
+                            {char}
+                        </button>
+                    ))}
+                </div>
+
                 <textarea
                     id="lyrics"
                     name="lyrics"

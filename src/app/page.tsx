@@ -21,6 +21,17 @@ export default function Home() {
 
         {/* Search Bar */}
         <SearchBar />
+
+        {/* Add song link */}
+        <p className="mt-6 text-sm text-[var(--muted)]">
+          Can&apos;t find it?{" "}
+          <a
+            href="/add"
+            className="text-[var(--accent)] hover:underline"
+          >
+            Add a song
+          </a>
+        </p>
       </main>
     </div>
   );
